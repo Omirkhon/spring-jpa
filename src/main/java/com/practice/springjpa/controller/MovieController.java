@@ -54,40 +54,24 @@ public class MovieController {
             throw new RuntimeException();
         }
 
-        Pageable pageable = PageRequest.of(page-1, size);
-        Page<Movie> pageResult = null;
+        Sort.Direction direction = sortOrder.equals("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
 
-        if (sortOrder.equalsIgnoreCase("asc")) {
-            pageResult = movieRepository.findByRatingBetweenAndReleaseYearBetween(
-                    minRating, maxRating, startYear, endYear, Sort.by(Sort.Direction.ASC, sortBy), pageable);
-        } else if (sortOrder.equalsIgnoreCase("desc")) {
-            pageResult = movieRepository.findByRatingBetweenAndReleaseYearBetween(
-                    minRating, maxRating, startYear, endYear, Sort.by(Sort.Direction.DESC, sortBy), pageable);
-        } else {
-            throw new RuntimeException();
-        }
-        return pageResult.getContent();
+        return movieRepository.findByRatingBetweenAndReleaseYearBetween(minRating, maxRating, startYear, endYear, pageable).getContent();
     }
 
-    @GetMapping("search") public List<Movie> findBySubqueryMinRatingAndStartYear(@RequestParam String query, @RequestParam int minRating, @RequestParam int startYear,
-                                                              @RequestParam String sortBy, @RequestParam String sortOrder, @RequestParam int page, @RequestParam int size) {
+    @GetMapping("search") public List<Movie> findByTitleContainingAndRatingGreaterThanEqualAndReleaseYearGreaterThanEqualAndOrderByRatingDesc
+            (@RequestParam String query, @RequestParam double minRating, @RequestParam int startYear, @RequestParam String sortBy, @RequestParam String sortOrder, @RequestParam int page, @RequestParam int size) {
         if (page < 1 || size < 1 || size > 50) {
             throw new RuntimeException();
         }
-        Pageable pageable = PageRequest.of(page-1, size);
-        Page<Movie> pageResult = null;
 
-        if (sortOrder.equalsIgnoreCase("asc")) {
-            pageResult = movieRepository.findByTitleContainingAndRatingGreaterThanEqualAndReleaseYearGreaterThanEqualAndOrderByRatingDesc(
-                    query, minRating, startYear,  Sort.by(Sort.Direction.ASC, sortBy), pageable);
-        } else if (sortOrder.equalsIgnoreCase("desc")) {
-            pageResult = movieRepository.findByTitleContainingAndRatingGreaterThanEqualAndReleaseYearGreaterThanEqualAndOrderByRatingDesc(
-                    query, minRating, startYear, Sort.by(Sort.Direction.DESC, sortBy), pageable);
-        } else {
-            throw new RuntimeException();
-        }
-        return pageResult.getContent();
+        Sort.Direction direction = sortOrder.equals("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
 
+        return movieRepository.findByTitleContainingAndRatingGreaterThanEqualAndReleaseYearGreaterThanEqualOrderByRatingDesc(query, minRating, startYear, pageable).getContent();
     }
 
 }

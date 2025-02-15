@@ -19,8 +19,8 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
     Page<Movie> findByRatingBetween(double minRating, double maxRating, Pageable pageable);
 
     Page<Movie> findByRatingBetweenAndReleaseYearBetween(
-            double minRating, double maxRating, int startYear, int endYear, Sort sort, Pageable pageable);
+            double minRating, double maxRating, int startYear, int endYear, Pageable pageable);
 
-    Page<Movie> findByTitleContainingAndRatingGreaterThanEqualAndReleaseYearGreaterThanEqualAndOrderByRatingDesc(
-            String query, int minRating, int startYear, Sort sort, Pageable pageable);
+    Page<Movie> findByTitleContainingAndRatingGreaterThanEqualAndReleaseYearGreaterThanEqualOrderByRatingDesc(
+            String query, double minRating, int startYear, Pageable pageable);
 }
