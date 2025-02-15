@@ -11,5 +11,5 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     List<Product> findByNameContainingIgnoreCase(String substring);
 
-    Optional<Product> findFirst1OrderByPrice();
+    Optional<Product> findFirstByOrderByPriceDesc();
 }

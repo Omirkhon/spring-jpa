@@ -46,6 +46,6 @@ public class ProductController {
 
     @GetMapping("most-expensive")
     public Product findMostExpensiveProduct() {
-        return productRepository.findFirst1OrderByPrice().orElseThrow();
+        return productRepository.findFirstByOrderByPriceDesc().orElseThrow();
     }
 }
