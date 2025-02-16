@@ -1,9 +1,13 @@
 package com.practice.springjpa.controller;
 
+import com.practice.springjpa.dto.ProductFullDto;
+import com.practice.springjpa.mapper.ProductMapper;
 import com.practice.springjpa.model.Category;
 import com.practice.springjpa.model.Product;
+import com.practice.springjpa.model.Value;
 import com.practice.springjpa.repository.CategoryRepository;
 import com.practice.springjpa.repository.ProductRepository;
+import com.practice.springjpa.repository.ValueRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,16 +18,24 @@ import java.util.List;
 @RequestMapping("/products")
 public class ProductController {
     private final ProductRepository productRepository;
+    private final ProductMapper productMapper;
     private final CategoryRepository categoryRepository;
-
-    @GetMapping
-    public List<Product> findAll() {
-        return productRepository.findAll();
-    }
+    private final ValueRepository valueRepository;
 
     @GetMapping("{id}")
-    public Product findById(@PathVariable int id) {
-        return productRepository.findById(id).orElseThrow();
+    public ProductFullDto findById(@PathVariable int id) {
+        Product product = productRepository.findById(id).orElseThrow();
+        List<Value> values = valueRepository.findByProductId(product.getId());
+        for (Value value: values) {
+            product.addValue(value);
+        }
+        return productMapper.toFullDto(product);
+    }
+
+    @GetMapping
+    public List<ProductFullDto> findAll() {
+        List<Product> products = productRepository.findAllWithCategory();
+        return productMapper.toFullDto(products);
     }
 
     @PostMapping
@@ -48,4 +60,14 @@ public class ProductController {
     public Product findMostExpensiveProduct() {
         return productRepository.findFirstByOrderByPriceDesc().orElseThrow();
     }
+
+//    @GetMapping
+//    public List<Product> findAll() {
+//        return productRepository.findAll();
+//    }
+//
+//    @GetMapping("{id}")
+//    public Product findById(@PathVariable int id) {
+//        return productRepository.findById(id).orElseThrow();
+//    }
 }
