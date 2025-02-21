@@ -21,12 +21,9 @@ public class Product {
     String name;
     int price;
     @ManyToOne
+    @JoinColumn(name = "category_id")
     Category category;
 
     @OneToMany(mappedBy = "product")
     final List<Value> values = new ArrayList<>();
-
-    public void addValue(Value value) {
-        this.values.add(value);
-    }
 }

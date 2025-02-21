@@ -3,9 +3,12 @@ package com.practice.springjpa.mapper;
 import com.practice.springjpa.dto.ProductDto;
 import com.practice.springjpa.dto.ProductFullDto;
 import com.practice.springjpa.model.Product;
+import com.practice.springjpa.model.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class ProductMapper {
@@ -15,7 +18,13 @@ public class ProductMapper {
         productFullDto.setName(product.getName());
         productFullDto.setPrice(product.getPrice());
         productFullDto.setCategory(product.getCategory().getName());
-        productFullDto.setValues(product.getValues());
+
+        Map<String, String> options = new HashMap<>();
+
+        for (Value value : product.getValues()) {
+            options.put(value.getOption().getName(), value.getName());
+        }
+        productFullDto.setOptions(options);
 
         return productFullDto;
     }

@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -18,5 +19,5 @@ public class ProductFullDto {
     String name;
     double price;
     String category;
-    List<Value> values;
+    Map<String, String> options;
 }

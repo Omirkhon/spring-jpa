@@ -13,8 +13,10 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "options")
 public class Option {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     int id;
     String name;
     @ManyToOne
+    @JoinColumn(name="category_id")
     Category category;
 }

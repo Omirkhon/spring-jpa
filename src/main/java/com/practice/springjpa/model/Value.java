@@ -10,6 +10,7 @@ import lombok.Setter;
 @Table(name="values")
 public class Value {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     int id;
     String name;
     @ManyToOne

@@ -20,22 +20,11 @@ public class ProductController {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
     private final CategoryRepository categoryRepository;
-    private final ValueRepository valueRepository;
 
     @GetMapping("{id}")
     public ProductFullDto findById(@PathVariable int id) {
         Product product = productRepository.findById(id).orElseThrow();
-        List<Value> values = valueRepository.findByProductId(product.getId());
-        for (Value value: values) {
-            product.addValue(value);
-        }
         return productMapper.toFullDto(product);
-    }
-
-    @GetMapping
-    public List<ProductFullDto> findAll() {
-        List<Product> products = productRepository.findAllWithCategory();
-        return productMapper.toFullDto(products);
     }
 
     @PostMapping
