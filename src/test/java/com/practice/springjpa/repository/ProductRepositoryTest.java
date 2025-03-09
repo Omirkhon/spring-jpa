@@ -4,12 +4,10 @@ import com.practice.springjpa.model.Category;
 import com.practice.springjpa.model.Option;
 import com.practice.springjpa.model.Product;
 import com.practice.springjpa.model.Value;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -23,12 +21,11 @@ public class ProductRepositoryTest {
     ValueRepository valueRepository;
     @Autowired
     ProductRepository productRepository;
+    @Autowired
+    EntityManager entityManager;
 
     @Test
     void optionsShouldBeConnectedWithCategory() {
-        List<Value> values = new ArrayList<>();
-        List<Option> options = new ArrayList<>();
-
         Category category = new Category();
         category.setName("Smartphones");
         categoryRepository.save(category);
@@ -37,13 +34,11 @@ public class ProductRepositoryTest {
         color.setName("Color");
         color.setCategory(category);
         optionRepository.save(color);
-        options.add(color);
 
         Option storage = new Option();
         storage.setName("Storage");
         storage.setCategory(category);
         optionRepository.save(storage);
-        options.add(storage);
 
         Product product = new Product();
         product.setName("IPhone 15");
@@ -56,24 +51,26 @@ public class ProductRepositoryTest {
         colorValue.setOption(color);
         colorValue.setProduct(product);
         valueRepository.save(colorValue);
-        values.add(colorValue);
 
         Value storageValue = new Value();
         storageValue.setName("128GB");
         storageValue.setOption(storage);
         storageValue.setProduct(product);
         valueRepository.save(storageValue);
-        values.add(storageValue);
 
-        assertEquals(values, product.getValues());
-        assertEquals(options, category.getOptions());
+        int id = product.getId();
+
+        entityManager.clear();
+        assertEquals(2, productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException(""))
+                .getValues().size());
+        assertEquals(2, categoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException(""))
+                .getOptions().size());
     }
 
     @Test
     void optionsAndValuesShouldBeConnectedWithProduct() {
-        List<Value> values = new ArrayList<>();
-        List<Option> options = new ArrayList<>();
-
         Category smartphones = new Category();
         smartphones.setName("Smartphones");
         categoryRepository.save(smartphones);
@@ -86,13 +83,11 @@ public class ProductRepositoryTest {
         manufacturer.setName("Manufacturer");
         manufacturer.setCategory(smartphones);
         optionRepository.save(manufacturer);
-        options.add(manufacturer);
 
         Option storage = new Option();
         storage.setName("Storage");
         storage.setCategory(smartphones);
         optionRepository.save(storage);
-        options.add(storage);
 
         Product product = new Product();
         product.setName("IPhone 12");
@@ -105,5 +100,43 @@ public class ProductRepositoryTest {
         product2.setPrice(2000);
         product2.setCategory(smartphones);
         productRepository.save(product2);
+
+        Option manufacturerLaptop = new Option();
+        manufacturerLaptop.setName("Manufacturer");
+        manufacturerLaptop.setCategory(laptops);
+        optionRepository.save(manufacturerLaptop);
+
+        Option storageLaptop = new Option();
+        storageLaptop.setName("Storage");
+        storageLaptop.setCategory(laptops);
+        optionRepository.save(storageLaptop);
+
+        Value manufacturerValuePhone = new Value();
+        manufacturerValuePhone.setName("Apple");
+        manufacturerValuePhone.setOption(manufacturer);
+        manufacturerValuePhone.setProduct(product);
+        valueRepository.save(manufacturerValuePhone);
+
+        Value storageValuePhone = new Value();
+        storageValuePhone.setName("128GB");
+        storageValuePhone.setOption(storage);
+        storageValuePhone.setProduct(product);
+        valueRepository.save(storageValuePhone);
+
+        Value manufacturerValueLaptop = new Value();
+        manufacturerValueLaptop.setName("Apple");
+        manufacturerValueLaptop.setOption(manufacturerLaptop);
+        manufacturerValueLaptop.setProduct(product2);
+        valueRepository.save(manufacturerValueLaptop);
+
+        Value storageValueLaptop = new Value();
+        storageValueLaptop.setName("512GB");
+        storageValueLaptop.setOption(storageLaptop);
+        storageValueLaptop.setProduct(product2);
+        valueRepository.save(storageValueLaptop);
+
+        entityManager.clear();
+        assertEquals(2, productRepository.findAllByValuesName("Apple").size());
+        assertEquals(1, productRepository.findAllByValuesName("512GB").size());
     }
 }
