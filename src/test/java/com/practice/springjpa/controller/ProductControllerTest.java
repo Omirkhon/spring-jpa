@@ -1,5 +1,7 @@
 package com.practice.springjpa.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.practice.springjpa.mapper.ProductMapper;
 import com.practice.springjpa.model.Category;
 import com.practice.springjpa.model.Product;
 import com.practice.springjpa.repository.CategoryRepository;
@@ -9,10 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,9 +24,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@SpringBootTest
+@WebMvcTest({ProductController.class, ProductMapper.class})
 @AutoConfigureMockMvc
-@Transactional
 public class ProductControllerTest {
     @MockitoBean
     ProductRepository productRepository;
@@ -32,6 +33,8 @@ public class ProductControllerTest {
     CategoryRepository categoryRepository;
     @Autowired
     MockMvc mockMvc;
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Test
     @SneakyThrows
@@ -45,8 +48,6 @@ public class ProductControllerTest {
         product.setName("Товар");
         product.setPrice(1000);
         product.setCategory(category);
-
-        productRepository.save(product);
 
         Mockito.when(productRepository.findById(Mockito.anyInt()))
                 .thenReturn(Optional.of(product));
@@ -85,15 +86,11 @@ public class ProductControllerTest {
         product.setPrice(1000);
         product.setCategory(category);
 
-        productRepository.save(product);
-
         Product product2 = new Product();
         product2.setId(200);
         product2.setName("Товар2");
         product2.setPrice(2000);
         product2.setCategory(category);
-
-        productRepository.save(product2);
 
         Mockito.when(productRepository.findAll())
                 .thenReturn(List.of(product, product2));
@@ -120,23 +117,25 @@ public class ProductControllerTest {
         category.setName("Категория");
 
         Product product = new Product();
-        product.setId(100);
         product.setName("Товар");
         product.setPrice(1000);
-        product.setCategory(category);
 
-        productRepository.save(product);
+        String json = objectMapper.writeValueAsString(product);
+
+        Mockito.when(categoryRepository.findById(Mockito.anyInt()))
+                        .thenReturn(Optional.of(category));
 
         Mockito.when(productRepository.save(Mockito.any()))
                 .thenReturn(product);
 
         mockMvc.perform(post("/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
                         .param("categoryId", Integer.toString(category.getId())))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.name").value(product.getName()))
                 .andExpect(jsonPath("$.price").value(product.getPrice()))
-                .andExpect(jsonPath("$.category").value(product.getCategory()))
-                .andExpect(jsonPath("$.options").isEmpty());
+                .andExpect(jsonPath("$.category").value(category.getName()));
     }
 }
