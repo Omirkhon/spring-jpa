@@ -1,5 +1,6 @@
 package com.practice.springjpa.controller;
 
+import com.practice.springjpa.dto.ProductDto;
 import com.practice.springjpa.dto.ProductFullDto;
 import com.practice.springjpa.mapper.ProductMapper;
 import com.practice.springjpa.model.Category;
@@ -9,7 +10,9 @@ import com.practice.springjpa.repository.CategoryRepository;
 import com.practice.springjpa.repository.ProductRepository;
 import com.practice.springjpa.repository.ValueRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -23,16 +26,20 @@ public class ProductController {
 
     @GetMapping("{id}")
     public ProductFullDto findById(@PathVariable int id) {
-        Product product = productRepository.findById(id).orElseThrow();
+        Product product = productRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return productMapper.toFullDto(product);
     }
 
     @PostMapping
-    public Product create(@RequestParam int categoryId, @RequestBody Product product) {
-        Category category = categoryRepository.findById(categoryId).orElseThrow();
+    @ResponseStatus(HttpStatus.CREATED)
+    public ProductDto create(@RequestParam int categoryId, @RequestBody ProductDto productDto) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Product product = productMapper.fromDto(productDto);
         product.setCategory(category);
 
-        return productRepository.save(product);
+        productRepository.save(product);
+        return productMapper.toDto(product);
     }
 
     @GetMapping("price-between/{price1}/and/{price2}")
@@ -50,13 +57,8 @@ public class ProductController {
         return productRepository.findFirstByOrderByPriceDesc().orElseThrow();
     }
 
-//    @GetMapping
-//    public List<Product> findAll() {
-//        return productRepository.findAll();
-//    }
-//
-//    @GetMapping("{id}")
-//    public Product findById(@PathVariable int id) {
-//        return productRepository.findById(id).orElseThrow();
-//    }
+    @GetMapping
+    public List<ProductFullDto> findAll() {
+        return productMapper.toFullDto(productRepository.findAll());
+    }
 }

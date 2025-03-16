@@ -4,6 +4,8 @@ import com.practice.springjpa.dto.ProductDto;
 import com.practice.springjpa.dto.ProductFullDto;
 import com.practice.springjpa.model.Product;
 import com.practice.springjpa.model.Value;
+import com.practice.springjpa.repository.CategoryRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -11,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@RequiredArgsConstructor
 public class ProductMapper {
     public ProductFullDto toFullDto(Product product) {
         ProductFullDto productFullDto = new ProductFullDto();
@@ -27,6 +30,14 @@ public class ProductMapper {
         productFullDto.setOptions(options);
 
         return productFullDto;
+    }
+
+    public Product fromDto(ProductDto productDto) {
+        Product product = new Product();
+        product.setName(productDto.getName());
+        product.setPrice(productDto.getPrice());
+
+        return product;
     }
 
     public ProductDto toDto(Product product) {

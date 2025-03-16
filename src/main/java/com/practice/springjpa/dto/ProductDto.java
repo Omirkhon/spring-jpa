@@ -8,9 +8,8 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductDto {
-    @Id
     int id;
     String name;
-    double price;
+    int price;
     String category;
 }

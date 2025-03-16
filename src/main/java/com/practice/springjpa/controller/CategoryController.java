@@ -1,11 +1,14 @@
 package com.practice.springjpa.controller;
 
-import com.practice.springjpa.CategoryCreateDto;
+import com.practice.springjpa.dto.CategoryCreateDto;
+import com.practice.springjpa.dto.CategoryDto;
+import com.practice.springjpa.mapper.CategoryMapper;
 import com.practice.springjpa.model.Category;
 import com.practice.springjpa.model.Option;
 import com.practice.springjpa.repository.CategoryRepository;
 import com.practice.springjpa.repository.OptionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -17,6 +20,7 @@ import java.util.List;
 public class CategoryController {
     private final CategoryRepository categoryRepository;
     private final OptionRepository optionRepository;
+    private final CategoryMapper categoryMapper;
 
     @GetMapping
     public List<Category> findAll() {
@@ -29,7 +33,8 @@ public class CategoryController {
     }
 
     @PostMapping
-    public Category create(@RequestBody CategoryCreateDto categoryCreateDto) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public CategoryDto create(@RequestBody CategoryCreateDto categoryCreateDto) {
         List<Option> options = new ArrayList<>();
 
         Category category = new Category();
@@ -47,7 +52,7 @@ public class CategoryController {
         category.getOptions().addAll(options);
 
         optionRepository.saveAll(options);
-        return category;
+        return categoryMapper.toDto(category);
     }
 
     @PutMapping("{id}")
